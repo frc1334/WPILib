@@ -14,6 +14,7 @@
 #include "networktables2/type/NumberArray.h"
 #include "networktables2/type/StringArray.h"
 #include "SmartDashboard/SmartDashboard.h"
+#include "HAL/Semaphore.hpp"
 #include <list>
 #include <map>
 #include <set>
@@ -33,6 +34,7 @@ public:
 	void Run();	
 	void Remove(Command *command);
 	void RemoveAll();
+	void ResetAll();
 	void SetEnabled(bool enabled);
 	
 	void UpdateTable();
@@ -50,11 +52,11 @@ private:
 
 	static Scheduler *_instance;
 	Command::SubsystemSet m_subsystems;
-	SEM_ID m_buttonsLock;
+	MUTEX_ID m_buttonsLock;
 	typedef std::vector<ButtonScheduler *> ButtonVector;
 	ButtonVector m_buttons;
 	typedef std::vector<Command *> CommandVector;
-	SEM_ID m_additionsLock;
+	MUTEX_ID m_additionsLock;
 	CommandVector m_additions;
 	typedef std::set<Command *> CommandSet;
 	CommandSet m_commands;

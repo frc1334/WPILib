@@ -3,11 +3,9 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
+#pragma once
 
-#ifndef QUAD_ENCODER_H_
-#define QUAD_ENCODER_H_
-
-#include "ChipObject.h"
+#include "HAL/HAL.hpp"
 #include "CounterBase.h"
 #include "SensorBase.h"
 #include "Counter.h"
@@ -23,24 +21,28 @@ class DigitalSource;
  * reverse direction counting. When creating QuadEncoders, a direction is supplied that changes the
  * sense of the output to make code more readable if the encoder is mounted such that forward movement
  * generates negative values. Quadrature encoders have two digital outputs, an A Channel and a B Channel
- * that are out of phase with each other to allow the FPGA to do direction sensing. 
+ * that are out of phase with each other to allow the FPGA to do direction sensing.
+ *
+ * All encoders will immediately start counting - Reset() them if you need them
+ * to be zeroed before use.
  */
-class Encoder: public SensorBase, public CounterBase, public PIDSource, public LiveWindowSendable
+class Encoder : public SensorBase, public CounterBase, public PIDSource, public LiveWindowSendable
 {
 public:
 
-	Encoder(uint32_t aChannel, uint32_t bChannel, bool reverseDirection=false, EncodingType encodingType = k4X);
-	Encoder(uint8_t aModuleNumber, uint32_t aChannel, uint8_t bModuleNumber, uint32_t _bChannel, bool reverseDirection=false, EncodingType encodingType = k4X);
-	Encoder(DigitalSource *aSource, DigitalSource *bSource, bool reverseDirection=false, EncodingType encodingType = k4X);
-	Encoder(DigitalSource &aSource, DigitalSource &bSource, bool reverseDirection=false, EncodingType encodingType = k4X);
+	Encoder(uint32_t aChannel, uint32_t bChannel, bool reverseDirection = false,
+			EncodingType encodingType = k4X);
+	Encoder(DigitalSource *aSource, DigitalSource *bSource, bool reverseDirection = false,
+			EncodingType encodingType = k4X);
+	Encoder(DigitalSource &aSource, DigitalSource &bSource, bool reverseDirection = false,
+			EncodingType encodingType = k4X);
 	virtual ~Encoder();
 
 	// CounterBase interface
-	void Start();
 	int32_t Get();
 	int32_t GetRaw();
+	int32_t GetEncodingScale();
 	void Reset();
-	void Stop();
 	double GetPeriod();
 	void SetMaxPeriod(double maxPeriod);
 	bool GetStopped();
@@ -54,13 +56,18 @@ public:
 	int GetSamplesToAverage();
 	void SetPIDSourceParameter(PIDSourceParameter pidSource);
 	double PIDGet();
-	
+
 	void UpdateTable();
 	void StartLiveWindowMode();
 	void StopLiveWindowMode();
 	std::string GetSmartDashboardType();
 	void InitTable(ITable *subTable);
 	ITable * GetTable();
+
+	int32_t GetFPGAIndex()
+	{
+		return m_index;
+	}
 
 private:
 	void InitEncoder(bool _reverseDirection, EncodingType encodingType);
@@ -70,15 +77,13 @@ private:
 	DigitalSource *m_bSource;		// the B phase of the quad encoder
 	bool m_allocatedASource;		// was the A source allocated locally?
 	bool m_allocatedBSource;		// was the B source allocated locally?
-	tEncoder* m_encoder;
-	uint8_t m_index;
+	void* m_encoder;
+	int32_t m_index;				// The encoder's FPGA index.
 	double m_distancePerPulse;		// distance of travel for each encoder tick
 	Counter *m_counter;				// Counter object for 1x and 2x encoding
 	EncodingType m_encodingType;	// Encoding type
-	PIDSourceParameter m_pidSource;// Encoder parameter that sources a PID controller
-	
+	int32_t m_encodingScale;		// 1x, 2x, or 4x, per the encodingType
+	PIDSourceParameter m_pidSource;	// Encoder parameter that sources a PID controller
+
 	ITable *m_table;
 };
-
-#endif
-

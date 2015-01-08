@@ -1,114 +1,127 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.							  */
+/* Copyright (c) FIRST 2014. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
 
-#ifndef __AXIS_CAMERA_H__
-#define __AXIS_CAMERA_H__
+#pragma once
 
-#include <taskLib.h>
-#include <vxWorks.h> 
-#include <sockLib.h> 
-#include <inetLib.h>
+#include <thread>
+#include <string>
+#include <mutex>
 
-#include "Vision/AxisCameraParams.h"
-#if JAVA_CAMERA_LIB != 1
+#include "ErrorBase.h"
 #include "Vision/ColorImage.h"
 #include "Vision/HSLImage.h"
-#endif
 #include "nivision.h"
-#include <set>
-#include "Task.h"
-
-class PCVideoServer;
 
 /**
- * AxisCamera class.
- * This class handles everything about the Axis 206 FRC Camera.
- * It starts up 2 tasks each using a different connection to the camera:
- * - image reading task that reads images repeatedly from the camera
- * - parameter handler task in the base class that monitors for changes to
- *     parameters and updates the camera
+ * Axis M1011 network camera
  */
-class AxisCamera : public AxisCameraParams
+class AxisCamera: public ErrorBase
 {
-private:
-	explicit AxisCamera(const char *cameraIP);
 public:
+	enum WhiteBalance
+	{
+		kWhiteBalance_Automatic,
+		kWhiteBalance_Hold,
+		kWhiteBalance_FixedOutdoor1,
+		kWhiteBalance_FixedOutdoor2,
+		kWhiteBalance_FixedIndoor,
+		kWhiteBalance_FixedFluorescent1,
+		kWhiteBalance_FixedFluorescent2
+	};
+
+	enum ExposureControl
+	{
+		kExposureControl_Automatic,
+		kExposureControl_Hold,
+		kExposureControl_FlickerFree50Hz,
+		kExposureControl_FlickerFree60Hz
+	};
+
+	enum Resolution
+	{
+		kResolution_640x480,
+		kResolution_480x360,
+		kResolution_320x240,
+		kResolution_240x180,
+		kResolution_176x144,
+		kResolution_160x120,
+	};
+
+	enum Rotation
+	{
+		kRotation_0, kRotation_180
+	};
+
+	explicit AxisCamera(std::string const& cameraHost);
 	virtual ~AxisCamera();
-	static AxisCamera& GetInstance(const char *cameraIP = NULL);
-	static void DeleteInstance();
 
-	bool IsFreshImage();
-	SEM_ID GetNewImageSem();
+	bool IsFreshImage() const;
 
-	int GetImage(Image *imaqImage);
-#if JAVA_CAMERA_LIB != 1
+	int GetImage(Image *image);
 	int GetImage(ColorImage *image);
 	HSLImage *GetImage();
-#endif
+	int CopyJPEG(char **destImage, unsigned int &destImageSize, unsigned int &destImageBufferSize);
 
-	int CopyJPEG(char **destImage, int &destImageSize, int &destImageBufferSize);
+	void WriteBrightness(int brightness);
+	int GetBrightness();
+
+	void WriteWhiteBalance(WhiteBalance whiteBalance);
+	WhiteBalance GetWhiteBalance();
+
+	void WriteColorLevel(int colorLevel);
+	int GetColorLevel();
+
+	void WriteExposureControl(ExposureControl exposureControl);
+	ExposureControl GetExposureControl();
+
+	void WriteExposurePriority(int exposurePriority);
+	int GetExposurePriority();
+
+	void WriteMaxFPS(int maxFPS);
+	int GetMaxFPS();
+
+	void WriteResolution(Resolution resolution);
+	Resolution GetResolution();
+
+	void WriteCompression(int compression);
+	int GetCompression();
+
+	void WriteRotation(Rotation rotation);
+	Rotation GetRotation();
 
 private:
-	static int s_ImageStreamTaskFunction(AxisCamera *thisPtr);
-	int ImageStreamTaskFunction();
-
-	int ReadImagesFromCamera();
-	void UpdatePublicImageFromCamera(char *imgBuffer, int imgSize);
-
-	virtual void RestartCameraTask();
-
-	static AxisCamera *_instance;
+	std::thread m_captureThread;
+	std::string m_cameraHost;
 	int m_cameraSocket;
-	typedef std::set<SEM_ID> SemSet_t;
-	SemSet_t m_newImageSemSet;
+	std::mutex m_captureMutex;
 
-	char* m_protectedImageBuffer;
-	int m_protectedImageBufferLength;
-	int m_protectedImageSize;
-	SEM_ID m_protectedImageSem;
+	std::mutex m_imageDataMutex;
+	std::vector<uint8_t> m_imageData;
 	bool m_freshImage;
 
-	Task m_imageStreamTask;
+	int m_brightness;
+	WhiteBalance m_whiteBalance;
+	int m_colorLevel;
+	ExposureControl m_exposureControl;
+	int m_exposurePriority;
+	int m_maxFPS;
+	Resolution m_resolution;
+	int m_compression;
+	Rotation m_rotation;
+	bool m_parametersDirty;
+	bool m_streamDirty;
+	std::mutex m_parametersMutex;
 
-	PCVideoServer *m_videoServer;
+	bool m_done;
+
+	void Capture();
+	void ReadImagesFromCamera();
+	bool WriteParameters();
+
+	int CreateCameraSocket(std::string const& requestString, bool setError);
+
+	DISALLOW_COPY_AND_ASSIGN(AxisCamera);
 };
-
-#if JAVA_CAMERA_LIB == 1
-#ifdef __cplusplus
-extern "C" {
-#endif
-	void AxisCameraStart(const char *IPAddress);
-	int AxisCameraGetImage(Image *image);
-	void AxisCameraDeleteInstance();
-	int AxisCameraFreshImage();
-
-	// Mid-stream gets & writes
-	void AxisCameraWriteBrightness(int brightness);
-	int AxisCameraGetBrightness();
-	void AxisCameraWriteWhiteBalance(AxisCameraParams::WhiteBalance_t whiteBalance);
-	AxisCameraParams::WhiteBalance_t AxisCameraGetWhiteBalance();
-	void AxisCameraWriteColorLevel(int colorLevel);
-	int AxisCameraGetColorLevel();
-	void AxisCameraWriteExposureControl(AxisCameraParams::Exposure_t exposure);
-	AxisCameraParams::Exposure_t AxisCameraGetExposureControl();
-	void AxisCameraWriteExposurePriority(int exposurePriority);
-	int AxisCameraGetExposurePriority();
-	void AxisCameraWriteMaxFPS(int maxFPS);
-	int AxisCameraGetMaxFPS();
-
-	// New-Stream gets & writes
-	void AxisCameraWriteResolution(AxisCameraParams::Resolution_t resolution);
-	AxisCameraParams::Resolution_t AxisCameraGetResolution();
-	void AxisCameraWriteCompression(int compression);
-	int AxisCameraGetCompression();
-	void AxisCameraWriteRotation(AxisCameraParams::Rotation_t rotation);
-	AxisCameraParams::Rotation_t AxisCameraGetRotation();
-#ifdef __cplusplus
-}
-#endif
-#endif // JAVA_CAMERA_LIB == 1
-
-#endif

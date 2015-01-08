@@ -3,11 +3,9 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
+#pragma once
 
-#ifndef __SPI_H__
-#define __SPI_H__
-
-#include "ChipObject.h"
+#include "HAL/HAL.hpp"
 #include "SensorBase.h"
 
 class DigitalOutput;
@@ -19,24 +17,14 @@ class DigitalInput;
  * This class is intended to be used by sensor (and other SPI device) drivers.
  * It probably should not be used directly.
  *
- * The FPGA only supports a single SPI interface.
  */
 class SPI : public SensorBase
 {
 public:
-	enum tFrameMode {kChipSelect, kPreLatchPulse, kPostLatchPulse, kPreAndPostLatchPulse};
-	enum tSPIConstants {kReceiveFIFODepth=512, kTransmitFIFODepth=512};
-
-	SPI(DigitalOutput &clk, DigitalOutput &mosi, DigitalInput &miso);
-	SPI(DigitalOutput *clk, DigitalOutput *mosi, DigitalInput *miso);
-	SPI(DigitalOutput &clk, DigitalOutput &mosi);
-	SPI(DigitalOutput *clk, DigitalOutput *mosi);
-	SPI(DigitalOutput &clk, DigitalInput &miso);
-	SPI(DigitalOutput *clk, DigitalInput *miso);
+	enum Port {kOnboardCS0, kOnboardCS1, kOnboardCS2, kOnboardCS3, kMXP};
+	SPI(Port SPIport);
 	virtual ~SPI();
 
-	void SetBitsPerWord(uint32_t bits);
-	uint32_t GetBitsPerWord();
 	void SetClockRate(double hz);
 
 	void SetMSBFirst();
@@ -45,39 +33,26 @@ public:
 	void SetSampleDataOnFalling();
 	void SetSampleDataOnRising();
 
-	void SetSlaveSelect(DigitalOutput *ss, tFrameMode mode=kChipSelect, bool activeLow=false);
-	void SetSlaveSelect(DigitalOutput &ss, tFrameMode mode=kChipSelect, bool activeLow=false);
-	DigitalOutput *GetSlaveSelect(tFrameMode *mode=NULL, bool *activeLow=NULL);
 
 	void SetClockActiveLow();
 	void SetClockActiveHigh();
 
-	virtual void ApplyConfig();
+	void SetChipSelectActiveHigh();
+	void SetChipSelectActiveLow();
 
-	virtual uint16_t GetOutputFIFOAvailable();
-	virtual uint16_t GetNumReceived();
+	virtual int32_t Write(uint8_t* data, uint8_t size);
+	virtual int32_t Read(bool initiate, uint8_t* dataReceived, uint8_t size);
+	virtual int32_t Transaction(uint8_t* dataToSend, uint8_t* dataReceived, uint8_t size);
 
-	virtual bool IsDone();
-	bool HadReceiveOverflow();
-
-	virtual void Write(uint32_t data);
-	virtual uint32_t Read(bool initiate = false);
-
-	virtual void Reset();
-	virtual void ClearReceivedData();
 
 protected:
-	static SEM_ID m_semaphore;
-
-	tSPI* m_spi;
-	tSPI::tConfig m_config;
-	tSPI::tChannels m_channels;
-	DigitalOutput *m_ss;
+	uint8_t m_port;
+	bool m_msbFirst;
+	bool m_sampleOnTrailing;
+	bool m_clk_idle_high;
 
 private:
-	void Init(DigitalOutput *clk, DigitalOutput *mosi, DigitalInput *miso);
+	void Init();
 
 	DISALLOW_COPY_AND_ASSIGN(SPI);
 };
-
-#endif

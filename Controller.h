@@ -1,13 +1,14 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.							  */
+/* Copyright (c) FIRST 2008. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
+#pragma once
 
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
-
-#include <vxWorks.h>
+#include <stdint.h>
+#include <cmath>
+#include <pthread.h>
+#include <semaphore.h>
 
 /**
  * Interface for Controllers
@@ -30,6 +31,4 @@ public:
 	 */
 	virtual void Disable() = 0;
 };
-
-#endif
 

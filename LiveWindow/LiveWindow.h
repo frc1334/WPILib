@@ -14,7 +14,7 @@ struct LiveWindowComponent
 	bool isSensor;
 
 	LiveWindowComponent()
-	{}//WTF?
+	{}
 	LiveWindowComponent(std::string subsystem, std::string name, bool isSensor)
 	{
 		this->subsystem = subsystem;
@@ -35,9 +35,10 @@ public:
 	void Run();
 	void AddSensor(const char *subsystem, const char *name, LiveWindowSendable *component);
 	void AddActuator(const char *subsystem, const char *name, LiveWindowSendable *component);
-	void AddSensor(std::string type, int module, int channel, LiveWindowSendable *component);
+	void AddSensor(std::string type, int channel, LiveWindowSendable *component);
+	void AddActuator(std::string type, int channel, LiveWindowSendable *component);
 	void AddActuator(std::string type, int module, int channel, LiveWindowSendable *component);
-	
+
 	bool IsEnabled() { return m_enabled; }
 	void SetEnabled(bool enabled);
 
@@ -49,19 +50,17 @@ private:
 	void UpdateValues();
 	void Initialize();
 	void InitializeLiveWindowComponents();
-	
+
 	std::vector<LiveWindowSendable *> m_sensors;
 	std::map<LiveWindowSendable *, LiveWindowComponent> m_components;
-	
-	static LiveWindow *m_instance;
+
 	ITable *m_liveWindowTable;
 	ITable *m_statusTable;
-	
+
 	Scheduler *m_scheduler;
-	
+
 	bool m_enabled;
 	bool m_firstTime;
 };
 
 #endif
-

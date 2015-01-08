@@ -9,7 +9,7 @@
 
 #if (defined __vxworks || defined WIN32)
 
-#include "ErrorBase.h"
+#include "NTErrorBase.h"
 #ifdef __vxworks
 #include <vxWorks.h>
 #endif

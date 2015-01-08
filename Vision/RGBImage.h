@@ -1,11 +1,10 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.							  */
+/* Copyright (c) FIRST 2014. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
 
-#ifndef __RGB_IMAGE_H__
-#define __RGB_IMAGE_H__
+#pragma once
 
 #include "ColorImage.h"
 
@@ -20,4 +19,3 @@ public:
     virtual ~RGBImage();
 };
 
-#endif

@@ -1,7 +1,7 @@
 #ifndef __SYM_MODULE_LINK_H__
 #define __SYM_MODULE_LINK_H__
 
-#include <vxWorks.h>
+#include "HAL/HAL.hpp"
 
 #ifdef __cplusplus
 extern "C" {

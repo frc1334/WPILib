@@ -1,60 +1,61 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.							  */
+/* Copyright (c) FIRST 2014. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
 
-#ifndef COMPRESSOR_H_
-#define COMPRESSOR_H_
+#ifndef Compressor_H_
+#define Compressor_H_
 
-#define COMPRESSOR_PRIORITY 90
-
+#include "HAL/HAL.hpp"
 #include "SensorBase.h"
-#include "Relay.h"
-#include "Task.h"
+#include "tables/ITableListener.h"
 #include "LiveWindow/LiveWindowSendable.h"
 
-class DigitalInput;
-
 /**
- * Compressor object.
- * The Compressor object is designed to handle the operation of the compressor, pressure sensor and
- * relay for a FIRST robot pneumatics system. The Compressor object starts a task which runs in the
- * backround and periodically polls the pressure sensor and operates the relay that controls the
- * compressor.
- */ 
-class Compressor: public SensorBase, public LiveWindowSendable
-{
+ * PCM compressor
+ */
+class Compressor: public SensorBase, public LiveWindowSendable, public ITableListener {
 public:
-	Compressor(uint32_t pressureSwitchChannel, uint32_t compressorRelayChannel);
-	Compressor(uint8_t pressureSwitchModuleNumber, uint32_t pressureSwitchChannel,
-			uint8_t compresssorRelayModuleNumber, uint32_t compressorRelayChannel);
-	~Compressor();
+	explicit Compressor(uint8_t pcmID);
+	Compressor();
+	virtual ~Compressor();
 
 	void Start();
 	void Stop();
 	bool Enabled();
-	uint32_t GetPressureSwitchValue();
-	void SetRelayValue(Relay::Value relayValue);
-	
+
+	bool GetPressureSwitchValue();
+
+	float GetCompressorCurrent();
+
+	void SetClosedLoopControl(bool on);
+	bool GetClosedLoopControl();
+
+	bool GetCompressorCurrentTooHighFault();
+	bool GetCompressorCurrentTooHighStickyFault();
+	bool GetCompressorShortedStickyFault();
+	bool GetCompressorShortedFault();
+	bool GetCompressorNotConnectedStickyFault();
+	bool GetCompressorNotConnectedFault();
+	void ClearAllPCMStickyFaults();
+
 	void UpdateTable();
 	void StartLiveWindowMode();
 	void StopLiveWindowMode();
 	std::string GetSmartDashboardType();
 	void InitTable(ITable *subTable);
-	ITable * GetTable();
+	ITable *GetTable();
+	void ValueChanged(ITable* source, const std::string& key, EntryValue value, bool isNew);
+
+protected:
+	void *m_pcm_pointer;
 
 private:
-	void InitCompressor(uint8_t pressureSwitchModuleNumber, uint32_t pressureSwitchChannel,
-				uint8_t compresssorRelayModuleNumber, uint32_t compressorRelayChannel);
+	void InitCompressor(uint8_t module);
+	void SetCompressor(bool on);
 
-	DigitalInput *m_pressureSwitch;
-	Relay *m_relay;
-	bool m_enabled;
-	Task m_task;
-	
 	ITable *m_table;
 };
 
-#endif
-
+#endif /* Compressor_H_ */

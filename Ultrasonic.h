@@ -3,9 +3,7 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef ULTRASONIC_H_
-#define ULTRASONIC_H_
+#pragma once
 
 #include "SensorBase.h"
 #include "Task.h"
@@ -26,19 +24,18 @@ class DigitalOutput;
  * the echo is received. The time that the line is high determines the round trip distance
  * (time of flight).
  */
-class Ultrasonic: public SensorBase, public PIDSource, public LiveWindowSendable
+class Ultrasonic : public SensorBase, public PIDSource, public LiveWindowSendable
 {
 public:
-	typedef enum {
+	enum DistanceUnit
+	{
 		kInches = 0,
 		kMilliMeters = 1
-	} DistanceUnit;
-	
+	};
+
 	Ultrasonic(DigitalOutput *pingChannel, DigitalInput *echoChannel, DistanceUnit units = kInches);
 	Ultrasonic(DigitalOutput &pingChannel, DigitalInput &echoChannel, DistanceUnit units = kInches);
 	Ultrasonic(uint32_t pingChannel, uint32_t echoChannel, DistanceUnit units = kInches);
-	Ultrasonic(uint8_t pingModuleNumber, uint32_t pingChannel,
-							uint8_t echoModuleNumber, uint32_t echoChannel, DistanceUnit units = kInches);
 	virtual ~Ultrasonic();
 
 	void Ping();
@@ -46,9 +43,15 @@ public:
 	static void SetAutomaticMode(bool enabling);
 	double GetRangeInches();
 	double GetRangeMM();
-	bool IsEnabled() { return m_enabled; }
-	void SetEnabled(bool enable) { m_enabled = enable; }
-	
+	bool IsEnabled()
+	{
+		return m_enabled;
+	}
+	void SetEnabled(bool enable)
+	{
+		m_enabled = enable;
+	}
+
 	double PIDGet();
 	void SetDistanceUnits(DistanceUnit units);
 	DistanceUnit GetDistanceUnits();
@@ -73,7 +76,7 @@ private:
 	static Task m_task; // task doing the round-robin automatic sensing
 	static Ultrasonic *m_firstSensor; // head of the ultrasonic sensor list
 	static bool m_automaticEnabled; // automatic round robin mode
-	static SEM_ID m_semaphore; // synchronize access to the list of sensors
+	static SEMAPHORE_ID m_semaphore; // synchronize access to the list of sensors
 
 	DigitalInput *m_echoChannel;
 	DigitalOutput *m_pingChannel;
@@ -82,9 +85,6 @@ private:
 	Counter *m_counter;
 	Ultrasonic *m_nextSensor;
 	DistanceUnit m_units;
-	
+
 	ITable *m_table;
 };
-
-#endif
-

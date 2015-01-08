@@ -1,11 +1,10 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.							  */
+/* Copyright (c) FIRST 2014. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
 
-#ifndef __THRESHOLD_H__
-#define __THRESHOLD_H__
+#pragma once
 
 /**
  * Color threshold values.
@@ -23,8 +22,7 @@ public:
 	int plane3Low;
 	int plane3High;
 	Threshold(int plane1Low, int plane1High,
-		int plane2Low, int plane2High,
-		int plane3Low, int plane3High);
+	          int plane2Low, int plane2High,
+	          int plane3Low, int plane3High);
 };
 
-#endif

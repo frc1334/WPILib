@@ -3,14 +3,12 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef __PREFERENCES_H__
-#define __PREFERENCES_H__
+#pragma once
 
 #include "ErrorBase.h"
 #include "Task.h"
 #include <map>
-#include <semLib.h>
+#include "HAL/Semaphore.hpp"
 #include <string>
 #include <vector>
 #include "tables/ITableListener.h"
@@ -18,10 +16,10 @@
 
 /**
  * The preferences class provides a relatively simple way to save important values to
- * the cRIO to access the next time the cRIO is booted.
+ * the RoboRIO to access the next time the RoboRIO is booted.
  *
  * <p>This class loads and saves from a file
- * inside the cRIO.  The user can not access the file directly, but may modify values at specific
+ * inside the RoboRIO.  The user can not access the file directly, but may modify values at specific
  * fields which will then be saved to the file when {@link Preferences#Save() Save()} is called.</p>
  *
  * <p>This class is thread safe.</p>
@@ -43,17 +41,17 @@ public:
 	double GetDouble(const char *key, double defaultValue = 0.0);
 	float GetFloat(const char *key, float defaultValue = 0.0);
 	bool GetBoolean(const char *key, bool defaultValue = false);
-	INT64 GetLong(const char *key, INT64 defaultValue = 0);
+	int64_t GetLong(const char *key, int64_t defaultValue = 0);
 	void PutString(const char *key, const char *value);
 	void PutInt(const char *key, int value);
 	void PutDouble(const char *key, double value);
 	void PutFloat(const char *key, float value);
 	void PutBoolean(const char *key, bool value);
-	void PutLong(const char *key, INT64 value);
+	void PutLong(const char *key, int64_t value);
 	void Save();
 	bool ContainsKey(const char *key);
 	void Remove(const char *key);
-	
+
 	void ValueChanged(ITable* source, const std::string& key, EntryValue value, bool isNew);
 
 protected:
@@ -67,17 +65,25 @@ private:
 	void ReadTaskRun();
 	void WriteTaskRun();
 
-	static int InitReadTask(Preferences *obj) {obj->ReadTaskRun();return 0;}
-	static int InitWriteTask(Preferences *obj) {obj->WriteTaskRun();return 0;}
+	static int InitReadTask(Preferences *obj)
+	{
+		obj->ReadTaskRun();
+		return 0;
+	}
+	static int InitWriteTask(Preferences *obj)
+	{
+		obj->WriteTaskRun();
+		return 0;
+	}
 
 	static Preferences *_instance;
 
 	/** The semaphore for accessing the file */
-	SEM_ID m_fileLock;
+	MUTEX_ID m_fileLock;
 	/** The semaphore for beginning reads and writes to the file */
-	SEM_ID m_fileOpStarted;
+	SEMAPHORE_ID m_fileOpStarted;
 	/** The semaphore for reading from the table */
-	SEM_ID m_tableLock;
+	MUTEX_ID m_tableLock;
 	typedef std::map<std::string, std::string> StringMap;
 	/** The actual values (String->String) */
 	StringMap m_values;
@@ -90,5 +96,3 @@ private:
 	Task m_readTask;
 	Task m_writeTask;
 };
-
-#endif

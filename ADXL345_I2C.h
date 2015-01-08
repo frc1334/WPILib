@@ -3,24 +3,22 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
+#pragma once
 
-#ifndef __ADXL345_I2C_h__
-#define __ADXL345_I2C_h__
-
-#include "SensorBase.h"
-
-class I2C;
+#include "interfaces/Accelerometer.h"
+#include "I2C.h"
+#include "LiveWindow/LiveWindowSendable.h"
 
 /**
  * ADXL345 Accelerometer on I2C.
- * 
- * This class alows access to a Analog Devices ADXL345 3-axis accelerometer on an I2C bus.
- * This class assumes the default (not alternate) sensor address of 0x3A (8-bit address).
+ *
+ * This class allows access to a Analog Devices ADXL345 3-axis accelerometer on an I2C bus.
+ * This class assumes the default (not alternate) sensor address of 0x1D (7-bit address).
  */
-class ADXL345_I2C : public SensorBase
+class ADXL345_I2C : public Accelerometer, public I2C, public LiveWindowSendable
 {
 protected:
-	static const uint8_t kAddress = 0x3A;
+	static const uint8_t kAddress = 0x1D;
 	static const uint8_t kPowerCtlRegister = 0x2D;
 	static const uint8_t kDataFormatRegister = 0x31;
 	static const uint8_t kDataRegister = 0x32;
@@ -30,7 +28,6 @@ protected:
 		kDataFormat_FullRes=0x08, kDataFormat_Justify=0x04};
 
 public:
-	enum DataFormat_Range {kRange_2G=0x00, kRange_4G=0x01, kRange_8G=0x02, kRange_16G=0x03};
 	enum Axes {kAxis_X=0x00, kAxis_Y=0x02, kAxis_Z=0x04};
 	struct AllAxes
 	{
@@ -40,14 +37,27 @@ public:
 	};
 
 public:
-	explicit ADXL345_I2C(uint8_t moduleNumber, DataFormat_Range range=kRange_2G);
+	explicit ADXL345_I2C(Port port, Range range = kRange_2G);
 	virtual ~ADXL345_I2C();
+
+	// Accelerometer interface
+	virtual void SetRange(Range range);
+	virtual double GetX();
+	virtual double GetY();
+	virtual double GetZ();
+
 	virtual double GetAcceleration(Axes axis);
 	virtual AllAxes GetAccelerations();
 
+	virtual std::string GetSmartDashboardType();
+	virtual void InitTable(ITable *subtable);
+	virtual void UpdateTable();
+	virtual ITable* GetTable();
+	virtual void StartLiveWindowMode() {}
+	virtual void StopLiveWindowMode() {}
+
 protected:
-	I2C* m_i2c;
+	//I2C* m_i2c;
+private:
+	ITable *m_table;
 };
-
-#endif
-

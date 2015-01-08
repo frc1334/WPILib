@@ -3,9 +3,7 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef ROBOT_ITERATIVE_H_
-#define ROBOT_ITERATIVE_H_
+#pragma once
 
 #include "Timer.h"
 #include "RobotBase.h"
@@ -38,7 +36,8 @@
  * 
  */
 
-class IterativeRobot : public RobotBase {
+class IterativeRobot : public RobotBase
+{
 public:
 	/*
 	 * The default period for the periodic function calls (seconds)
@@ -52,32 +51,23 @@ public:
 	virtual void RobotInit();
 	virtual void DisabledInit();
 	virtual void AutonomousInit();
-    virtual void TeleopInit();
-    virtual void TestInit();
+	virtual void TeleopInit();
+	virtual void TestInit();
 
 	virtual void DisabledPeriodic();
 	virtual void AutonomousPeriodic();
-    virtual void TeleopPeriodic();
-    virtual void TestPeriodic();
-
-	void SetPeriod(double period);
-	double GetPeriod();
-	double GetLoopsPerSec();
+	virtual void TeleopPeriodic();
+	virtual void TestPeriodic();
 
 protected:
+	virtual void Prestart();
+
 	virtual ~IterativeRobot();
 	IterativeRobot();
 
 private:
-	bool NextPeriodReady();
-
 	bool m_disabledInitialized;
 	bool m_autonomousInitialized;
-    bool m_teleopInitialized;
-    bool m_testInitialized;
-	double m_period;
-	Timer m_mainLoopTimer;
+	bool m_teleopInitialized;
+	bool m_testInitialized;
 };
-
-#endif
-

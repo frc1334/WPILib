@@ -3,14 +3,11 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef _ERROR_H
-#define _ERROR_H
+#pragma once
 
 #include "Base.h"
-#include "ChipObject/NiRio.h"
 #include <string>
-#include <vxWorks.h>
+#include <stdint.h>
 
 //  Forward declarations
 class ErrorBase;
@@ -21,7 +18,7 @@ class ErrorBase;
 class Error
 {
 public:
-	typedef tRioStatusCode Code;
+	typedef int32_t Code;
 
 	Error();
 	~Error();
@@ -32,12 +29,14 @@ public:
 	const char *GetFunction() const;
 	uint32_t GetLineNumber() const;
 	const ErrorBase* GetOriginatingObject() const;
-	double GetTime() const;
+	double GetTimestamp() const;
 	void Clear();
-	void Set(Code code, const char* contextMessage, const char* filename,
-		const char *function, uint32_t lineNumber, const ErrorBase* originatingObject);
-	static void EnableStackTrace(bool enable) { m_stackTraceEnabled=enable; }
-	static void EnableSuspendOnError(bool enable) { m_suspendOnErrorEnabled=enable; }
+	void Set(Code code, const char* contextMessage, const char* filename, const char *function,
+			uint32_t lineNumber, const ErrorBase* originatingObject);
+	static void EnableSuspendOnError(bool enable)
+	{
+		m_suspendOnErrorEnabled = enable;
+	}
 
 private:
 	void Report();
@@ -50,10 +49,6 @@ private:
 	const ErrorBase* m_originatingObject;
 	double m_timestamp;
 
-	static bool m_stackTraceEnabled;
 	static bool m_suspendOnErrorEnabled;
-	DISALLOW_COPY_AND_ASSIGN(Error);
+    DISALLOW_COPY_AND_ASSIGN(Error);
 };
-
-#endif
-

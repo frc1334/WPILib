@@ -3,23 +3,20 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
+#pragma once
 
-#ifndef ANALOG_TRIGGER_H_
-#define ANALOG_TRIGGER_H_
-
+#include "HAL/HAL.hpp"
 #include "AnalogTriggerOutput.h"
 #include "SensorBase.h"
 
-class AnalogChannel;
-class AnalogModule;
+class AnalogInput;
 
-class AnalogTrigger: public SensorBase
+class AnalogTrigger : public SensorBase
 {
 	friend class AnalogTriggerOutput;
 public:
-	AnalogTrigger(uint8_t moduleNumber, uint32_t channel);
-	explicit AnalogTrigger(uint32_t channel);
-	explicit AnalogTrigger(AnalogChannel *channel);
+	explicit AnalogTrigger(int32_t channel);
+	explicit AnalogTrigger(AnalogInput *channel);
 	virtual ~AnalogTrigger();
 
 	void SetLimitsVoltage(float lower, float upper);
@@ -29,16 +26,11 @@ public:
 	uint32_t GetIndex();
 	bool GetInWindow();
 	bool GetTriggerState();
-	AnalogTriggerOutput *CreateOutput(AnalogTriggerOutput::Type type);
+	AnalogTriggerOutput *CreateOutput(AnalogTriggerType type);
 
 private:
-	void InitTrigger(uint8_t moduleNumber, uint32_t channel);
+	void InitTrigger(uint32_t channel);
 
 	uint8_t m_index;
-	tAnalogTrigger *m_trigger;
-	AnalogModule *m_analogModule;
-	uint32_t m_channel;
+	void* m_trigger;
 };
-
-#endif
-

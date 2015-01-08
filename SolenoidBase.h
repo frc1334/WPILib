@@ -3,26 +3,29 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef SOLENOID_BASE_H_
-#define SOLENOID_BASE_H_
+#pragma once
 
 #include "Resource.h"
 #include "SensorBase.h"
-#include "ChipObject.h"
-#include "Synchronized.h"
+#include "HAL/HAL.hpp"
+#include "HAL/cpp/Synchronized.hpp"
 
 /**
  * SolenoidBase class is the common base class for the Solenoid and
  * DoubleSolenoid classes.
  */
-class SolenoidBase : public SensorBase {
+class SolenoidBase : public SensorBase
+{
 public:
 	virtual ~SolenoidBase();
 	uint8_t GetAll();
 
+	uint8_t GetPCMSolenoidBlackList();
+	bool GetPCMSolenoidVoltageStickyFault();
+	bool GetPCMSolenoidVoltageFault();
+	void ClearAllPCMStickyFaults();
 protected:
-	explicit SolenoidBase(uint8_t moduleNumber);
+	explicit SolenoidBase(uint8_t pcmID);
 	void Set(uint8_t value, uint8_t mask);
 	virtual void InitSolenoid() = 0;
 
@@ -30,9 +33,5 @@ protected:
 	static Resource *m_allocated;
 
 private:
-	static tSolenoid *m_fpgaSolenoidModule; ///< FPGA Solenoid Module object.
-	static uint32_t m_refCount; ///< Reference count for the chip object.
-	static ReentrantSemaphore m_semaphore;
+	void* m_ports[kSolenoidChannels];
 };
-
-#endif

@@ -3,14 +3,14 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef __WPI_ERRORS_H__
-#define __WPI_ERRORS_H__
+#pragma once
 
 #ifdef WPI_ERRORS_DEFINE_STRINGS
-#define S(label, offset, message) const char *wpi_error_s_##label = message ;
+#define S(label, offset, message) const char *wpi_error_s_##label = message ; \
+	const int32_t wpi_error_value_##label = offset
 #else
-#define S(label, offset, message) extern const char *wpi_error_s_##label;
+#define S(label, offset, message) extern const char *wpi_error_s_##label ; \
+	const int32_t wpi_error_value_##label = offset
 #endif
 
 /*
@@ -47,12 +47,14 @@ S(LineNotOutput, -27, "Cannot SetDigitalOutput for a line not configured for out
 S(ParameterOutOfRange, -28, "A parameter is out of range.");
 S(SPIClockRateTooLow, -29, "SPI clock rate was below the minimum supported");
 S(JaguarVersionError, -30, "Jaguar firmware version error");
+S(JaguarMessageNotFound, -31, "Jaguar message not found");
 S(NetworkTablesReadError, -40, "Error reading NetworkTables socket");
 S(NetworkTablesBufferFull, -41, "Buffer full writing to NetworkTables socket");
 S(NetworkTablesWrongType, -42, "The wrong type was read from the NetworkTables entry");
 S(NetworkTablesCorrupt, -43, "NetworkTables data stream is corrupt");
 S(SmartDashboardMissingKey, -43, "SmartDashboard data does not exist");
 S(CommandIllegalUse, -50, "Illegal use of Command");
+S(UnsupportedInSimulation, -80, "Unsupported in simulation");
 
 /*
  * Warnings
@@ -63,8 +65,8 @@ S(CompressorTaskError, 3, "Compressor task won't start");
 S(LoopTimingError, 4, "Digital module loop timing is not the expected value");
 S(NonBinaryDigitalValue, 5, "Digital output value is not 0 or 1");
 S(IncorrectBatteryChannel, 6, "Battery measurement channel is not correct value");
-S(BadJoystickIndex, 7, "Joystick index is out of range, should be 1-4");
-S(BadJoystickAxis, 8, "Joystick axis is out of range");
+S(BadJoystickIndex, 7, "Joystick index is out of range, should be 0-3");
+S(BadJoystickAxis, 8, "Joystick axis or POV is out of range");
 S(InvalidMotorIndex, 9, "Motor index is out of range, should be 0-3");
 S(DriverStationTaskError, 10, "Driver Station task won't start");
 S(EnhancedIOPWMPeriodOutOfRange, 11, "Driver Station Enhanced IO PWM Output period out of range.");
@@ -74,5 +76,3 @@ S(SPIReadNoData, 14, "No data available to read from SPI");
 S(IncompatibleState, 15, "Incompatible State: The operation cannot be completed");
 
 #undef S
-
-#endif // __WPI_ERRORS_H__

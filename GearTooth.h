@@ -3,9 +3,7 @@
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in $(WIND_BASE)/WPILib.  */
 /*----------------------------------------------------------------------------*/
-
-#ifndef GEAR_TOOTH_H_
-#define GEAR_TOOTH_H_
+#pragma once
 
 #include "Counter.h"
 
@@ -21,14 +19,10 @@ public:
 	/// 55 uSec for threshold
 	static constexpr double kGearToothThreshold = 55e-6;
 	GearTooth(uint32_t channel, bool directionSensitive = false);
-	GearTooth(uint8_t moduleNumber, uint32_t channel, bool directionSensitive = false);
 	GearTooth(DigitalSource *source, bool directionSensitive = false);
 	GearTooth(DigitalSource &source, bool directionSensitive = false);
 	virtual ~GearTooth();
 	void EnableDirectionSensing(bool directionSensitive);
-	
+
 	virtual std::string GetSmartDashboardType();
 };
-
-
-#endif
